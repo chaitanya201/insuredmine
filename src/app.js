@@ -3,6 +3,8 @@ import AppError from "./utils/appError.js";
 import cors from "cors";
 import errorHandler from "./controller/errorHandler.js";
 import mainRouter from "./routes/index.js";
+import { startScheduler } from "./utils/scheduler.js";
+import { cpuMonitoring } from "./utils/monitoring.js";
 const app = express();
 
 app.use(express.json());
@@ -29,5 +31,8 @@ app.use(`/api`, mainRouter);
 // });
 
 app.use(errorHandler);
+
+startScheduler(); // Start the message scheduler
+cpuMonitoring(); // Start CPU monitoring
 
 export default app;

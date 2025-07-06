@@ -6,4 +6,3 @@ export const SERVER_CONFIG = {
   WORKER_FILE:
     process.env.WORKER_FILE || `${process.cwd()}/src/workers/worker.js`,
 };
-console.log(process.cwd());

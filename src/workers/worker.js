@@ -56,8 +56,8 @@ connectToDatabase();
       );
 
       const account = await UserAccountModel.findOneAndUpdate(
-        { name: row.account_name },
-        { name: row.account_name },
+        { name: row.account_name, userId: user._id },
+        { name: row.account_name, userId: user._id },
         { upsert: true, new: true, ...(session ? { session } : {}) }
       );
 
@@ -88,6 +88,10 @@ connectToDatabase();
               policyNumber: row.policy_number,
               policyStartDate: new Date(row.policy_start_date),
               policyEndDate: new Date(row.policy_end_date),
+              premiumAmount: row.premium_amount,
+              policyType: row.policy_type,
+              policyMode: row.policy_mode,
+              producer: row.producer,
               userId: user._id,
               policyCategoryId: category._id,
               companyCarrierId: carrier._id,
