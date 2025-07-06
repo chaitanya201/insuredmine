@@ -4,8 +4,13 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": " nodemon src/server.js"
+    "test": "nodemon src/server.js",
+    "dev": "pm2 start src/server.js --name my-app",
+    "status": " pm2 status",
+    "stop": "pm2 stop my-app",
+    "restart": "pm2 restart my-app",
+    "logs": "pm2 logs my-app",
+    "delete": "pm2 delete my-app"
   },
   "keywords": [],
   "author": "",
@@ -19,6 +24,7 @@
     "multer": "^2.0.1",
     "node-schedule": "^2.1.1",
     "nodemon": "^3.1.10",
+    "pm2": "^6.0.8",
     "xlsx": "^0.18.5",
     "zod": "^3.25.74"
   }

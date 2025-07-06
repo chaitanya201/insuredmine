@@ -12,14 +12,18 @@ import fs from "fs";
 import { connectToDatabase } from "../db/config/connection.js";
 import mongoose from "mongoose";
 import { SERVER_CONFIG } from "../config/server.config.js";
+import { policyRowSchema } from "../validators/policy.js";
 
 connectToDatabase();
 (async () => {
   const workbook = xlsx.readFile(workerData.filePath);
   const sheet = xlsx.utils.sheet_to_json(
-    workbook.Sheets[workbook.SheetNames[0]]
+    workbook.Sheets[workbook.SheetNames[0]],
+    { raw: false }
   );
   let count = 0;
+  let errorCount = 0;
+  let successCount = 0;
 
   console.log("Processing rows...");
   console.log("Total rows to process:", sheet.length);
@@ -33,6 +37,20 @@ connectToDatabase();
   try {
     for (const row of sheet) {
       count++;
+
+      const { error, success } = policyRowSchema.safeParse(row);
+
+      if (!success) {
+        errorCount++;
+        console.error(
+          "skipping row due to validation error:",
+          row,
+          " error:",
+          error
+        );
+        continue;
+      }
+
       const agent = await AgentModel.findOneAndUpdate(
         { name: row.agent },
         { name: row.agent },
@@ -100,12 +118,20 @@ connectToDatabase();
           session && { session }
         );
       }
+      successCount++;
 
       console.log("row processed", count, ":", row.policy_number);
     }
+    if (successCount === 0) {
+      parentPort.postMessage({
+        status: "error",
+        error: "No valid rows found in the file.",
+      });
+      return;
+    }
     parentPort.postMessage({
       status: "success",
-      data: `Processed ${count} rows successfully.`,
+      data: `Processed ${count} rows in total — ${successCount} succeeded, ${errorCount} failed.`,
     });
     if (session) await session.commitTransaction();
   } catch (error) {

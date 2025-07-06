@@ -2,15 +2,31 @@ import centralController from "../../helpers/general/centralController.js";
 import { Worker } from "worker_threads";
 
 import { SERVER_CONFIG } from "../../config/server.config.js";
-import { getPolicyInfoSchema } from "../../validators/policy.js";
+import {
+  getPolicyInfoSchema,
+  uploadPolicySchema,
+} from "../../validators/policy.js";
 import { PolicyInfoModel, UserModel } from "../../db/models/index.js";
 
 export const uploadPolicyFile = centralController(async (req, res, next) => {
   try {
     if (!req.file) {
-      return res.status(400).json({ message: "No file uploaded" });
+      return res.status(400).json({
+        message:
+          "No file uploaded. Please upload an Excel (.xlsx) or CSV (.csv) file.",
+      });
     }
+    const { success, error } = uploadPolicySchema.safeParse({
+      policyFileName: req.file.originalname,
+    });
 
+    if (!success) {
+      return res.status(400).json({
+        message:
+          "Invalid file type. Please upload an Excel (.xlsx) or CSV (.csv) file.",
+        errors: error.errors,
+      });
+    }
     const filePath = req.file.path;
 
     const worker = new Worker(SERVER_CONFIG.WORKER_FILE, {
